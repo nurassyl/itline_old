@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "
+SET autocommit = 0;
+SET default_storage_engine = 'InnoDB';
+SET foreign_key_checks = 1;
+SET GLOBAL TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SET GLOBAL time_zone = '+00:00';
+SET SESSION time_zone = '+00:00';
+
+SELECT 'OK';
+" | python3.6 manage.py dbshell
