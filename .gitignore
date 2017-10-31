@@ -1,0 +1,5 @@
+**/migrations
+**/__pycache__
+*.log
+node_modules
+bower_components
