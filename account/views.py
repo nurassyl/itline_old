@@ -8,21 +8,17 @@ from django.db import transaction
 from django.db import connection
 
 def root(req):
-	if req.method == 'GET':
+	if req.method == 'POST':
 		transaction.set_autocommit(False)
 		try:
 			with transaction.atomic():
-				user = Account.objects.create_account(name=' nurasyl aldan ', email='nurassyl.aldan@gmail.com', password='nurasyl12345')
+				user = Account.objects.create_account(name=req.POST.get('name', ''), email=req.POST.get('email', ''), password=req.POST.get('password', ''), language=req.POST.get('language', ''))
 				data = model_to_dict(user)
 			transaction.commit()
 			# print(connection.queries)
-			return JsonResponse(data, safe=False)
+			return JsonResponse(data, safe=False, status=201)
 		except ValidationError as error:
-			return JsonResponse(error.message_dict, safe=False)
-	elif req.method == 'POST':
-		# Create.
-		data = {}
-		return JsonResponse(data, safe=False)
+			return JsonResponse(error.message_dict, safe=False, status=400)
 	elif req.method == 'DELETE':
 		# Delete.
 		data = {}

@@ -6,6 +6,8 @@ from itline import settings
 import re
 from django.core.validators import MinLengthValidator
 from django.core.exceptions import ValidationError
+from datetime import datetime
+import time
 
 def validate_language(value):
 	if value not in settings.LANGUAGES:
@@ -57,7 +59,7 @@ class Account(AbstractBaseUser):
 	recovery_token_expire = models.IntegerField(null=True, blank=True, default=None)
 
 	login_datetime = models.DateTimeField(auto_now=True)
-	login_time = models.TimeField(auto_now=True)
+	login_time = models.IntegerField(default=int(time.time()))
 
 	name = models.CharField(max_length=50, validators=[MinLengthValidator(3)])
 	language = models.CharField(max_length=5, default=settings.LANGUAGE_CODE, validators=[validate_language])
@@ -65,7 +67,7 @@ class Account(AbstractBaseUser):
 	is_admin = models.BooleanField(default=False)
 
 	created_datetime = models.DateTimeField(auto_now=True)
-	created_time = models.TimeField(auto_now=True)
+	created_time = models.IntegerField(default=int(time.time()))
 
 	created_ip = models.GenericIPAddressField(null=True, blank=True, default=None)
 	created_country = models.CharField(max_length=100, null=True, blank=True, default=None)
@@ -92,3 +94,20 @@ class Account(AbstractBaseUser):
 		self.normalize_email()
 		self.normalize_password()
 		self.name = self.name.strip(); self.name = re.sub('\s+', ' ', self.name); self.name = self.name.title()
+
+	def set_login_time(self):
+		self.login_datetime = datetime.now()
+		self.login_time = int(time.time())
+		self.save()
+	def  activate(self):
+		self.is_active = True
+		self.save()
+	def  deactivate(self):
+		self.is_active = False
+		self.save()
+	def to_administer(self):
+		self.is_admin = True
+		self.save()
+	def to_deadminister(self):
+		self.is_admin = False
+		self.save()
