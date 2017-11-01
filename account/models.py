@@ -6,28 +6,26 @@ from itline import settings
 import re
 from django.core.validators import MinLengthValidator
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
 
 def validate_language(value):
 	if value not in settings.LANGUAGES:
-		raise ValidationError(
-            _("'%(value)s' language is not exists in supported languages list"),
-            params={'value': value},
-        )
+		return settings.LANGUAGE_CODE
 
 class AccountManager(BaseUserManager):
 	def create_account(self, name, email, password, language=None, ip=None, user_agent=None):
 		user = self.model()
 		user.name = name
 		user.email = email
-		user.set_password(password)
+		user.password = password
+		user.normalize()
 		user.full_clean()
-		#user.save(using=self._db)
+		user.set_password(password)
+		user.save(using=self._db)
 		return user
 	def create_superuser(self, name, email, password, language=None, ip=None, user_agent=None):
 		user = self.create_account(name=name, email=email, password=password, language=language, ip=ip, user_agent=user_agent)
 		user.is_admin = True
-		#user.save(using=self._db)
+		user.save(using=self._db)
 		return user
 
 class Account(AbstractBaseUser):
