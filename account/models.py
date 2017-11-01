@@ -6,8 +6,8 @@ from itline import settings
 import re
 from django.core.validators import MinLengthValidator
 from django.core.exceptions import ValidationError
-from datetime import datetime
 import time
+from django.utils import timezone
 
 def validate_language(value):
 	if value not in settings.LANGUAGES:
@@ -96,7 +96,7 @@ class Account(AbstractBaseUser):
 		self.name = self.name.strip(); self.name = re.sub('\s+', ' ', self.name); self.name = self.name.title()
 
 	def set_login_time(self):
-		self.login_datetime = datetime.now()
+		self.login_datetime = timezone.now()
 		self.login_time = int(time.time())
 		self.save()
 	def  activate(self):

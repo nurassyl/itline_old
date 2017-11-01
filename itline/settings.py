@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'account',
-    'session'
+    'account'
 ]
 
 MIDDLEWARE = [
@@ -82,11 +81,7 @@ DATABASES = {
         'PORT': 3306,
         'USER': 'root',
         'PASSWORD': '12345',
-        'NAME': 'itline',
-        'AUTOCOMMIT': False,
-        'TEST': {
-            'NAME': 'test_itline'
-        }
+        'NAME': 'itline'
     }
 }
 

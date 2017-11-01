@@ -9,10 +9,10 @@ from django.db import connection
 
 def root(req):
 	if req.method == 'POST':
-		transaction.set_autocommit(False)
 		try:
+			transaction.set_autocommit(False)
 			with transaction.atomic():
-				user = Account.objects.create_account(name=req.POST.get('name', ''), email=req.POST.get('email', ''), password=req.POST.get('password', ''), language=req.POST.get('language', ''))
+				user = Account.objects.create_superuser(name=req.POST.get('name', ''), email=req.POST.get('email', ''), password=req.POST.get('password', ''), language=req.POST.get('language', ''))
 				data = model_to_dict(user)
 			transaction.commit()
 			# print(connection.queries)
@@ -24,7 +24,7 @@ def root(req):
 		data = {}
 		return JsonResponse(data, safe=False)
 	elif req.method == 'PUT':
-		# Delete.
+		# Update.
 		data = {}
 		return JsonResponse(data, safe=False)
 	else:
