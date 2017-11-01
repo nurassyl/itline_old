@@ -19,6 +19,8 @@ class AccountManager(BaseUserManager):
 		user.name = name
 		user.email = email
 		user.password = password
+		user.created_ip = ip
+		user.created_user_agent = user_agent
 		user.normalize()
 		user.full_clean()
 		user.set_password(password)
@@ -36,7 +38,7 @@ class Account(AbstractBaseUser):
 	objects = AccountManager()
 
 	USERNAME_FIELD = 'email'
-	REQUIRED_FIELDS = ['password', 'name']
+	REQUIRED_FIELDS = ['name']
 
 	def __str__(self):
 		return self.email
@@ -70,21 +72,8 @@ class Account(AbstractBaseUser):
 	created_time = models.IntegerField(default=int(time.time()))
 
 	created_ip = models.GenericIPAddressField(null=True, blank=True, default=None)
-	created_country = models.CharField(max_length=100, null=True, blank=True, default=None)
-	created_region = models.CharField(max_length=100, null=True, blank=True, default=None)
-	created_city = models.CharField(max_length=100, null=True, blank=True, default=None)
-	created_timezone = models.CharField(max_length=100, null=True, blank=True, default=None)
-	created_isp = models.CharField(max_length=250, null=True, blank=True, default=None)
-
+	created_location = models.CharField(max_length=200, null=True, blank=True, default=None)
 	created_user_agent = models.CharField(max_length=300, null=True, blank=True, default=None)
-	created_browser_family = models.CharField(max_length=50, null=True, blank=True, default=None)
-	created_browser_version = models.CharField(max_length=25, null=True, blank=True, default=None)
-	created_os_family = models.CharField(max_length=50, null=True, blank=True, default=None)
-	created_os_version = models.CharField(max_length=25, null=True, blank=True, default=None)
-	created_device_family = models.CharField(max_length=50, null=True, blank=True, default=None)
-	created_device_brand = models.CharField(max_length=50, null=True, blank=True, default=None)
-	created_device_model = models.CharField(max_length=50, null=True, blank=True, default=None)
-	created_device_type = models.CharField(max_length=25, null=True, blank=True, default=None)
 
 	def normalize_email(self):
 		self.email = self.email.strip().lower()

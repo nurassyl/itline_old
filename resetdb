@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS django_admin_log;
 DROP TABLE IF EXISTS django_content_type;
 DROP TABLE IF EXISTS django_migrations;
 DROP TABLE IF EXISTS django_session;
+DROP TABLE IF EXISTS user_sessions_session;
 
 SET foreign_key_checks = 1;
 
