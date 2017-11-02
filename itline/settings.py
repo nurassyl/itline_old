@@ -81,7 +81,10 @@ DATABASES = {
         'PORT': 3306,
         'USER': 'root',
         'PASSWORD': '12345',
-        'NAME': 'itline'
+        'NAME': 'itline',
+        'TEST': {
+            'NAME': 'test_itline'
+        }
     }
 }
 

@@ -1,14 +1,8 @@
-from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, Http404
 from account.models import Account
 from django.forms.models import model_to_dict
-from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.contrib.auth import login, logout, authenticate
-import re
-import time
-import uuid
 
 @transaction.atomic
 def root(req):
@@ -30,12 +24,12 @@ def root(req):
 
 @transaction.atomic
 def sessions(req):
+	from django.contrib.auth import login, logout, authenticate
+
 	if req.method == 'POST':
-		normalize = Account()
-		normalize.email = req.POST.get('email', '')
-		normalize.password = req.POST.get('password', '')
-		normalize.normalize()
-		account = authenticate(req, username=normalize.email, password=normalize.password)
+		email = Account.normalize_email(req.POST.get('email', ''))
+		password = Account.normalize_password(req.POST.get('password', ''))
+		account = authenticate(req, username=email, password=password)
 		if account is not None:
 			login(req, account)
 			return HttpResponse('', content_type='text/plain', status=202)
@@ -55,12 +49,14 @@ def sessions(req):
 
 @transaction.atomic
 def recovery(req):
-	if req.method == 'POST':
-		normalize = Account()
-		normalize.email = req.GET.get('email', '')
-		normalize.normalize()
+	import re
+	import time
+	import uuid
+
+	if req.method == 'GET':
+		email = Account.normalize_email(req.GET.get('email', ''))
 		try:
-			account = Account.objects.get(email=normalize.email)
+			account = Account.objects.get(email=email)
 			account.recovery_token = re.sub('-', '', str(uuid.uuid4()))
 			account.recovery_token_expire = int(time.time()+300) # 5 minutes.
 			account.save()
@@ -76,38 +72,29 @@ def recovery(req):
 		except Account.DoesNotExist:
 			raise Http404
 	elif req.method == 'POST':
-		validate = Account()
-		validate.password = req.POST.get('password', '')
+		password = Account.normalize_password(req.POST.get('password', ''))
 		token = req.POST.get('token')
-		validate.normalize()
-		errors = {}
 		try:
-			validate.full_clean()
-		except ValidationError as error:
-			errors = error.message_dict
-			del errors['email']
-			del errors['name']
-		if len(errors) != 0:
-			# Validation failed.
-			return JsonResponse(errors, status=400)
-		else:
-			# Data is valid.
-			try:
-				account = Account.objects.get(recovery_token=token)
-				if int(time.time()) > account.recovery_token_expire:
-					# Timeout.
-					account.recovery_token = None
-					account.recovery_token_expire = None
-					account.save()
-					return HttpResponse('', content_type='text/plain', status=408)
-				else:
-					account.set_password(validate.password)
-					account.recovery_token = None
-					account.recovery_token_expire = None
-					account.save()
-					req.user.session_set.all().delete()
-					return HttpResponse('', content_type='text/plain', status=202)
-			except Account.DoesNotExist:
-				raise Http404
+			account = Account.objects.get(recovery_token=token)
+			if int(time.time()) > account.recovery_token_expire:
+				# Timeout.
+				account.recovery_token = None
+				account.recovery_token_expire = None
+				account.save()
+				return HttpResponse('', content_type='text/plain', status=408)
+			else:
+				account.password = password
+				try:
+					account.full_clean()
+				except ValidationError as error:
+					return JsonResponse(error.message_dict, status=400)
+				account.set_password(password)
+				account.recovery_token = None
+				account.recovery_token_expire = None
+				account.save()
+				account.session_set.all().delete()
+				return HttpResponse('', content_type='text/plain', status=202)
+		except Account.DoesNotExist:
+			raise Http404
 	else:
 		raise Http404

@@ -36,6 +36,7 @@ python3.6 manage.py migrate --database=default
 ##### **Test the application**
 ```
 python3.6 manage.py test --keepdb
+```
 
 ##### **Run HTTP server**
 ```

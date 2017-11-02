@@ -16,12 +16,11 @@ def validate_language(value):
 class AccountManager(BaseUserManager):
 	def create_account(self, name, email, password, language=None, ip=None, user_agent=None):
 		user = self.model()
-		user.name = name
-		user.email = email
-		user.password = password
+		user.name = Account.normalize_name(name)
+		user.email = Account.normalize_email(email)
+		user.password = Account.normalize_password(password)
 		user.created_ip = ip
 		user.created_user_agent = user_agent
-		user.normalize()
 		user.full_clean()
 		user.set_password(password)
 		user.save(using=self._db)
@@ -75,28 +74,20 @@ class Account(AbstractBaseUser):
 	created_location = models.CharField(max_length=200, null=True, blank=True, default=None)
 	created_user_agent = models.CharField(max_length=300, null=True, blank=True, default=None)
 
-	def normalize_email(self):
-		self.email = self.email.strip().lower()
-	def normalize_password(self):
-		self.password = self.password.strip()
-	def normalize(self):
-		self.normalize_email()
-		self.normalize_password()
-		self.name = self.name.strip(); self.name = re.sub('\s+', ' ', self.name); self.name = self.name.title()
+	@classmethod
+	def normalize_email(cls, value):
+		value = value.strip().lower()
+		return value
+	@classmethod
+	def normalize_password(cls, value):
+		value = value.strip()
+		return value
+	@classmethod
+	def normalize_name(csl, value):
+		value = value.strip(); value = re.sub('\s+', ' ', value); value = value.title()
+		return value
 
 	def set_login_time(self):
 		self.login_datetime = timezone.now()
 		self.login_time = int(time.time())
-		self.save()
-	def  activate(self):
-		self.is_active = True
-		self.save()
-	def  deactivate(self):
-		self.is_active = False
-		self.save()
-	def to_administer(self):
-		self.is_admin = True
-		self.save()
-	def to_deadminister(self):
-		self.is_admin = False
 		self.save()
