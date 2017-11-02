@@ -57,7 +57,7 @@ class Account(AbstractBaseUser):
 	email = models.EmailField(unique=True, max_length=254, validators=[MinLengthValidator(5)])
 	password = models.SlugField(max_length=100, validators=[MinLengthValidator(6)])
 
-	recovery_token = models.CharField(max_length=100, null=True, blank=True, default=None)
+	recovery_token = models.CharField(unique=True, max_length=100, null=True, blank=True, default=None)
 	recovery_token_expire = models.IntegerField(null=True, blank=True, default=None)
 
 	login_datetime = models.DateTimeField(auto_now=True)
